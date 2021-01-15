@@ -2,3 +2,4 @@ envrecipe/
 __pycache__/
 .vscode/
 .idea/
+data.db
