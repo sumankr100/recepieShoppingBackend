@@ -18,26 +18,6 @@ class ShoppingItem(Resource):
                         required=True,
                         help="This field cannot be left blank!")
 
-    def get(self, name):
-        """
-        Require name
-        :param name:
-        :return:
-        """
-        parser = reqparse.RequestParser()
-        parser.add_argument('id',
-                            type=int,
-                            required=False,
-                            help="This is id field to store in database!")
-        data = parser.parse_args()
-        if "id" in data:
-            item = ShoppingItemModel.find_by_name(name, data['id'])
-        else:
-            item = ShoppingItemModel.find_by_name(name)
-        if item:
-            return item.json(), 200
-        return {"message": "Item {} not found.".format(name)}, 404
-
     # @jwt_required()
     def post(self, name):
         data = ShoppingItem.parser.parse_args()
@@ -50,6 +30,17 @@ class ShoppingItem(Resource):
 
 
 class ShoppingItemUpdate(Resource):
+
+    def get(self, _id):
+        """
+
+        :param _id:
+        :return:
+        """
+        item = ShoppingItemModel.find_by_id(_id)
+        if item:
+            return item.json(), 200
+        return {"message": "Item {} not found.".format(name)}, 404
 
     # @jwt_required()
     def delete(self, _id):
