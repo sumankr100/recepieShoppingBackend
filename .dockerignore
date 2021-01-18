@@ -1,0 +1,5 @@
+# To ignore below files if present
+
+.idea
+data.db
+README.md

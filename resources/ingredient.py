@@ -9,19 +9,23 @@ class Ingredient(Resource):
                         type=float,
                         required=True,
                         help="Amount field cannot be left blank!")
-    parser.add_argument('recipe_id',
-                        type=int,
-                        required=True,
-                        help="Every ingredient needs a recipe id!")
 
     def get(self, name):
         """
-
-        :param name:
-        :param test:
-        :return:
+        To get the ingredient details
+        :param name: Name of the ingredient.
+        :return: Returns the details of ingredients with name and amount.
         """
-        ingredient = IngredientModel.find_by_name(name)
+        parser = reqparse.RequestParser()
+        parser.add_argument('recipe_id',
+                            type=int,
+                            required=False,
+                            help="If Ingredient is associated to any recipe!")
+        data = parser.parse_args()
+        if "recipe_id" in data:
+            ingredient = IngredientModel.find_by_name(name, data['recipe_id'])
+        else:
+            ingredient = IngredientModel.find_by_name(name)
         if ingredient:
             return ingredient.json(), 200
         return {"message": "Ingredient {} not found.".format(name)}, 404
@@ -60,5 +64,6 @@ class Ingredient(Resource):
 
 class IngredientList(Resource):
     def get(self):
-        ingredients = [ingredient.json() for ingredient in IngredientModel.query.all()]
+        ingredients = [ingredient.json() for ingredient in IngredientModel.query.filter_by(recipe_id=None)]
+        # ingredients = [ingredient.json() for ingredient in IngredientModel.query.all()]
         return ({"ingredients": ingredients}, 200) if ingredients else ({"message": "Not a single Ingredient present"}, 400)
