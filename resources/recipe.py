@@ -1,5 +1,6 @@
 from flask_restplus import Resource, reqparse
 from models.recipe import RecipeModel
+from models.ingredient import IngredientModel
 
 
 class Recipe(Resource):
@@ -12,6 +13,10 @@ class Recipe(Resource):
                         type=str,
                         required=True,
                         help="Needs an image path!")
+    parser.add_argument('ingredients',
+                        type=list,
+                        required=False,
+                        help="List of ingredients.!")
 
     def get(self, name):
         recipe = RecipeModel.find_by_name(name)
@@ -23,6 +28,7 @@ class Recipe(Resource):
         if RecipeModel.find_by_name(name):
             return {"message": "A recipe with name {} already exist.".format(name)}, 400
         data = Recipe.parser.parse_args()
+        print(data)
         recipe = RecipeModel(name, **data)
         try:
             recipe.save_to_db()

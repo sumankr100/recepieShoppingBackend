@@ -7,6 +7,7 @@ from security import authentication, identity
 from resources.user import UserRegister
 from resources.ingredient import Ingredient, IngredientList
 from resources.recipe import Recipe, RecipeList
+from resources.shopping_item import ShoppingItem, ShoppingItemList, ShoppingItemUpdate
 
 from db import db
 
@@ -28,13 +29,24 @@ def create_table():
     db.create_all()
 
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
+
+
 db.init_app(app)
 
 api.add_resource(Ingredient, '/ingredient/<string:name>')
 api.add_resource(IngredientList, '/ingredientList')
 api.add_resource(Recipe, '/recipe/<string:name>')
 api.add_resource(RecipeList, '/recipeList')
+api.add_resource(ShoppingItem, '/shoppingItem/<string:name>')
+api.add_resource(ShoppingItemUpdate, '/shoppingItemUpdate/<int:_id>')
+api.add_resource(ShoppingItemList, '/shoppingItemList')
 api.add_resource(UserRegister, "/UserRegister")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
