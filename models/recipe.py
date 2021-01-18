@@ -10,7 +10,7 @@ class RecipeModel(db.Model):
     description = db.Column(db.String(80))
     imagePath = db.Column(db.String)
 
-    ingredients = db.relationship('IngredientModel', lazy='dynamic')
+    ingredients = db.relationship('IngredientModel', lazy='dynamic', passive_deletes=True)
 
     def __init__(self, name, description, imagePath):
         self.name = name
@@ -33,4 +33,39 @@ class RecipeModel(db.Model):
 
     def delete_from_db(self):
         db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def add(cls, data):
+        ingredients = data.pop('ingredients', [])
+
+        recipe_obj = cls(**data)
+        recipe_obj.save_to_db()
+
+        recipe_obj.add_ingredients(ingredients)
+
+        return recipe_obj
+
+    def update(self, data):
+        self.delete_ingredients()
+        ingredients = data.pop('ingredients', [])
+
+        self.name = data.get('name')
+        self.description = data.get('description')
+        self.imagePath = data.get('imagePath')
+
+        self.add_ingredients(ingredients)
+
+        self.save_to_db()
+
+    def add_ingredients(self, ingredients_data):
+        from .ingredient import IngredientModel
+        db.session.add_all([
+            IngredientModel(**ing_data, recipe_id=self.id) \
+                for ing_data in ingredients_data]
+        )
+        db.session.commit()
+
+    def delete_ingredients(self):
+        self.ingredients.delete()
         db.session.commit()

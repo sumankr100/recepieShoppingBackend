@@ -9,8 +9,10 @@ class IngredientModel(db.Model):
     name = db.Column(db.String(80))
     amount = db.Column(db.Float(precision=2))
 
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'))
-    recipe = db.relationship('RecipeModel')
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey('recipes.id', ondelete='CASCADE')
+    )
+    recipe = db.relationship('RecipeModel', passive_deletes=True)
 
     def __init__(self, name, amount, recipe_id=None):
         self.name = name
