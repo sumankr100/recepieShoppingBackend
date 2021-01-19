@@ -1,9 +1,25 @@
 from flask import g
 from flask_restplus import fields, Resource, reqparse
 from models.recipe import RecipeModel
+from models.ingredient import IngredientModel
 
 from db import api
 
+
+class Recipe(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('description',
+                        type=str,
+                        required=True,
+                        help="Description field cannot be left blank!")
+    parser.add_argument('imagePath',
+                        type=str,
+                        required=True,
+                        help="Needs an image path!")
+    parser.add_argument('ingredients',
+                        type=list,
+                        required=False,
+                        help="List of ingredients.!")
 
 ingredients_nested_fields = api.model('Ingredient', {
     'name': fields.String,
@@ -63,3 +79,4 @@ class Recipe(Resource):
 class RecipeList(Resource):
     def get(self):
         return {"recipes": [recipe.json() for recipe in RecipeModel.query.all()]}
+

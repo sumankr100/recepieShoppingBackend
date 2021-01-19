@@ -16,16 +16,7 @@ class Ingredient(Resource):
         :param name: Name of the ingredient.
         :return: Returns the details of ingredients with name and amount.
         """
-        parser = reqparse.RequestParser()
-        parser.add_argument('recipe_id',
-                            type=int,
-                            required=False,
-                            help="If Ingredient is associated to any recipe!")
-        data = parser.parse_args()
-        if "recipe_id" in data:
-            ingredient = IngredientModel.find_by_name(name, data['recipe_id'])
-        else:
-            ingredient = IngredientModel.find_by_name(name)
+        ingredient = IngredientModel.find_by_name(name)
         if ingredient:
             return ingredient.json(), 200
         return {"message": "Ingredient {} not found.".format(name)}, 404
@@ -48,7 +39,8 @@ class Ingredient(Resource):
         ingredient = IngredientModel.find_by_name(name)
         if ingredient:
             ingredient.delete_from_db()
-        return {"message": "Ingredient {} deleted".format(name)}
+            return {"message": "Ingredient {} deleted".format(name)}
+        return {"message": "Ingredient {} does not exist.".format(name)}
 
     @jwt_required()
     def put(self, name):

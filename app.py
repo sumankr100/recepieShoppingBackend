@@ -20,16 +20,23 @@ def register_endpoints(app):
     from resources.user import UserRegister
     from resources.ingredient import Ingredient, IngredientList
     from resources.recipe import Recipe, RecipeList
+    from resources.shopping_item import (
+        ShoppingItem, ShoppingItemList, ShoppingItemUpdate,
+        IngredientsToShoppingList
+    )
 
     from db import api
     api.init_app(app)
 
-    api.add_resource(Ingredient, '/ingredient/<string:name>')
-    api.add_resource(IngredientList, '/ingredientList')
     api.add_resource(Recipe, '/recipe/<string:name>')
     api.add_resource(RecipeList, '/recipeList')
+    api.add_resource(ShoppingItem, '/shoppingItem/<string:name>')
+    api.add_resource(
+        IngredientsToShoppingList, '/toShoppingList/<int:recipe_id>'
+    )
+    api.add_resource(ShoppingItemUpdate, '/shoppingItemUpdate/<int:_id>')
+    api.add_resource(ShoppingItemList, '/shoppingItemList')
     api.add_resource(UserRegister, "/UserRegister")
-
     return api
 
 
@@ -54,6 +61,5 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
