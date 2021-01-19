@@ -72,6 +72,7 @@ class ShoppingItemList(Resource):
 
 
 class IngredientsToShoppingList(Resource):
+    @jwt_required()
     def post(self, recipe_id):
         recipe = RecipeModel.query.get(recipe_id)
 

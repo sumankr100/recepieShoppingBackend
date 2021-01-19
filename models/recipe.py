@@ -18,10 +18,15 @@ class RecipeModel(db.Model):
         self.imagePath = imagePath
 
     def json(self):
-        return {'name': self.name,
-                'description': self.description,
-                'imagePath': self.imagePath,
-                'ingredients': [ingredient.json() for ingredient in self.ingredients.all()]}
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'imagePath': self.imagePath,
+            'ingredients': [
+                ingredient.json() for ingredient in self.ingredients.all()
+            ]
+        }
 
     @classmethod
     def find_by_name(cls, name):
