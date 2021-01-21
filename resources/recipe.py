@@ -19,17 +19,25 @@ recipe_post_model = api.model('RecipeModel', {
     'ingredients': fields.List(fields.Nested(ingredients_nested_fields))
 })
 
+recipe_response_model = api.model('RecipeListResponseModel', {
+    "recipes": fields.List(fields.Nested(recipe_post_model))
+})
+
+recipe_delete_response = api.model('RecipeDeleteResponse', {
+    'ok': fields.Boolean,
+    'message': fields.String
+})
+
 
 class Recipe(Resource):
     @jwt_required()
-    def get(self, recipe_id=None):
-        if not recipe_id:
-            return {
-                "recipes": [
-                    recipe.json() for recipe in RecipeModel.query.all()
-                ]
-            }
-
+    @api.doc(params={'recipe_id':'A recipe ID'})
+    @api.marshal_with(recipe_post_model)
+    def get(self, recipe_id):
+        """
+        Recipe Details API. Takes Recipe ID from URL Param and return Recipe \
+        Object
+        """
         recipe = RecipeModel.query.get(recipe_id)
 
         if not recipe:
@@ -41,7 +49,11 @@ class Recipe(Resource):
 
     @jwt_required()
     @api.expect(recipe_post_model, validate=True)
+    @api.marshal_with(recipe_post_model, code=201)
     def post(self):
+        """
+        Recipe Post API.
+        """
         data = api.payload
         name = data.get('name')
         recipe_obj = None
@@ -57,7 +69,11 @@ class Recipe(Resource):
         return recipe_obj.json(), 201
 
     @jwt_required()
+    @api.marshal_with(recipe_delete_response)
     def delete(self, recipe_id):
+        """
+        Delete Recipe API.
+        """
         recipe = RecipeModel.query.get(recipe_id)
 
         if recipe:
@@ -68,7 +84,11 @@ class Recipe(Resource):
 
     @jwt_required()
     @api.expect(recipe_post_model, validate=True)
+    @api.marshal_with(recipe_post_model, code=201)
     def put(self, recipe_id):
+        """
+        PUT Recipe API
+        """
         data = api.payload
         recipe = RecipeModel.query.get(recipe_id)
 
@@ -80,3 +100,17 @@ class Recipe(Resource):
             recipe.update(data)
 
         return recipe.json(), 201
+
+
+class RecipeList(Resource):
+    @jwt_required()
+    @api.marshal_with(recipe_response_model)
+    def get(self):
+        """
+        Recipe List API
+        """
+        return {
+            "recipes": [
+                recipe.json() for recipe in RecipeModel.query.all()
+            ]
+        }

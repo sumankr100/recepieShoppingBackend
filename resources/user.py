@@ -1,35 +1,45 @@
-# from flask_restful import Resource, reqparse
-from flask_restplus import Resource, reqparse
+from flask_restplus import Resource, reqparse, fields
 from models.user import UserModel
+
+from db import api
+
+
+user_post_model = api.model('UserRegister', {
+    'username': fields.String,
+    'password': fields.String
+})
+
+
+response_model = api.model('UserRegisterResponse', {
+    'ok': fields.Boolean,
+    'message': fields.String
+})
 
 
 class UserRegister(Resource):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('username',
-                        type=str,
-                        required=True,
-                        help="Username is required for register.")
-    parser.add_argument('password',
-                        type=str,
-                        required=True,
-                        help="Password is required for register.")
-
-    @staticmethod
+    @api.expect(user_post_model, validate=True)
+    @api.marshal_with(response_model)
     def post():
         """
-        Accepts username and password in json format and return message whether user is created or not
-        {
-            "username": test_user,
-            "password": test_password
-        }
-        :return: confirmation
+        Accepts username and password in json format and return message \
+        whether user is created or not
         """
-        data = UserRegister.parser.parse_args()
-        if UserModel.find_user_by_name(data['username']):
-            return {"message": "User with name {} already exists.".format(data['username'])}, 400
-        user = UserModel(**data)
-        user.save_to_db()
-        return {"message": "User {} created successfully.".format(data["username"])}
+        data = api.payload
 
+        username = data.get('username', 'BLANK')
+
+        if UserModel.find_user_by_name(username):
+            return {
+                "ok": False,
+                "message": f"User with name {username} already exists"
+            }, 400
+
+        user = UserModel(**data)
+
+        user.save_to_db()
+
+        return {
+            "ok": True, 
+            "message": f"User {username} created successfully."
+        }
 
