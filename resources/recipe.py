@@ -103,7 +103,6 @@ class RecipeList(Resource):
         Recipe List API
         """
         user_id = current_identity.id
-        print(current_identity)
         return {
             "recipes": [
                 recipe.json() for recipe in RecipeModel.query.filter(

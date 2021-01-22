@@ -26,22 +26,16 @@ class ShoppingItem(Resource):
         user = current_identity
 
         item = ShoppingItemModel(name, data['amount'], user_id=user.id)
-        ShoppingItemModel.user_id = current_identity.id
         try:
             item.save_to_db()
         except:
-            return {"message": "Error in inserting item {}".format(name)}, 500
+            return {"message": f"Error in inserting item {name}"}, 500
         return item.json(), 201
 
 
 class ShoppingItemUpdate(Resource):
     @jwt_required()
     def get(self, _id):
-        """
-
-        :param _id:
-        :return:
-        """
         user = current_identity
 
         item = ShoppingItemModel.query.filter(
@@ -83,25 +77,27 @@ class ShoppingItemList(Resource):
     @jwt_required()
     def get(self):
         user = current_identity
-        items = [item.json() for item in ShoppingItemModel.query.filter(
-            ShoppingItemModel.user_id == user.id
-        ).all()]
-        return ({"items": items}, 200) if items else ({"message": "Not a single Item present"}, 400)
+        shopping_items = ShoppingItemModel.query.filter_by(user_id=user.id).all()
+        print(len(shopping_items), f'items found for {user.id}')
+        items = [item.json() for item in shopping_items]
+        return ({"items": items}, 200)
 
 
 class IngredientsToShoppingList(Resource):
     @jwt_required()
     def post(self, recipe_id):
-        recipe = RecipeModel.query.get(recipe_id)
+        from models.ingredient import IngredientModel
+
+        ings = IngredientModel.query.filter(
+            IngredientModel.recipe_id == recipe_id
+        ).all()
+
         user = current_identity
 
-        if not recipe:
-            return {
-                "ok": False, "err_msg": f"Recipe {recipe_id} not Found"
-            }, 404
         try:
+            print(len(ings), 'ings moved to list for {user.id} user')
             ShoppingItemModel.bulk_add(
-                recipe.ingredients.all(), user_id=user.id
+                ings, user_id=user.id
             )
         except Exception as exc:
             print(exc)

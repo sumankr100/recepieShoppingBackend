@@ -1,17 +1,14 @@
-from datetime import timedelta
 from flask import Flask, render_template
 from flask_restplus import Api
 
 from flask_jwt import JWT
 from security import authentication, identity
+from config import BASE_URL_PREFIX, HOST_URL
 
 
 def register_extensions(app):
     from db import db
     db.init_app(app)
-
-    app.config['JWT_AUTH_URL_RULE'] = '/login'
-    app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)  # setting half hour of token expiring time
 
     jwt = JWT(app, authentication, identity)
 
@@ -33,32 +30,31 @@ def register_endpoints(app):
         +" flask CRUD Actions"
     )
 
-    api.add_resource(Recipe, '/recipe/<int:recipe_id>', endpoint='recipe')
-    api.add_resource(RecipeList, '/recipe', endpoint='recipe-list')
+    api.add_resource(Recipe, f'{BASE_URL_PREFIX}/recipe/<int:recipe_id>', endpoint='recipe')
+    api.add_resource(RecipeList, f'{BASE_URL_PREFIX}/recipe', endpoint='recipe-list')
     api.add_resource(
-        IngredientsToShoppingList, '/toShoppingList/<int:recipe_id>'
+        IngredientsToShoppingList, f'{BASE_URL_PREFIX}/toShoppingList/<int:recipe_id>'
     )
 
-    api.add_resource(ShoppingItem, '/shoppingItem/<string:name>')
-    api.add_resource(ShoppingItemUpdate, '/shoppingItemUpdate/<int:_id>')
-    api.add_resource(ShoppingItemList, '/shoppingItemList')
+    api.add_resource(ShoppingItem, f'{BASE_URL_PREFIX}/shoppingItem/<string:name>')
+    api.add_resource(ShoppingItemUpdate, f'{BASE_URL_PREFIX}/shoppingItemUpdate/<int:_id>')
+    api.add_resource(ShoppingItemList, f'{BASE_URL_PREFIX}/shoppingItemList')
 
-    api.add_resource(UserRegister, "/UserRegister")
+    api.add_resource(UserRegister, f"{BASE_URL_PREFIX}/UserRegister")
 
     return api
 
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:mymotog2P@localhost:5432/recipe_db'
-    app.config['DEBUG'] = False
-    app.config['PROPOGATE_EXCEPTIONS'] = True
-    app.secret_key = '+\xba\xa5\xe6\xefv\x9c#\xba\xd9\x05pL\xc1\x11\x13\xc9\x1b-k1Rlr'
+    app.config.from_pyfile('config.py')
 
     @app.route('/redoc')
     def send_redoc():
-        return render_template('recipe/redoc.html')
+        ctx = {
+            "HOST_URL": HOST_URL
+        }
+        return render_template('recipe/redoc.html', **ctx)
 
     return app
 

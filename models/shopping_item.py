@@ -10,7 +10,7 @@ class ShoppingItemModel(db.Model):
     amount = db.Column(db.Integer)
 
     user_id = db.Column(
-        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE')
+        db.Integer, db.ForeignKey('users.id')
     )
 
     def __init__(self, name, amount, user_id, _id=None):
