@@ -19,7 +19,7 @@ response_model = api.model('UserRegisterResponse', {
 class UserRegister(Resource):
     @api.expect(user_post_model, validate=True)
     @api.marshal_with(response_model)
-    def post():
+    def post(self):
         """
         Accepts username and password in json format and return message \
         whether user is created or not

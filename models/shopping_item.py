@@ -9,9 +9,14 @@ class ShoppingItemModel(db.Model):
     name = db.Column(db.String(80))
     amount = db.Column(db.Integer)
 
-    def __init__(self, name, amount, _id=None):
+    user_id = db.Column(
+        db.Integer, db.ForeignKey('users.id', ondelete='CASCADE')
+    )
+
+    def __init__(self, name, amount, user_id, _id=None):
         self.id = _id
         self.name = name
+        self.user_id = user_id
         self.amount = amount
 
     def json(self):
@@ -37,9 +42,9 @@ class ShoppingItemModel(db.Model):
         db.session.commit()
 
     @classmethod
-    def bulk_add(cls, ingredient_objs):
+    def bulk_add(cls, ingredient_objs, user_id):
         db.session.add_all([
-            cls(name=ing_obj.name, amount=ing_obj.amount) \
+            cls(name=ing_obj.name, amount=ing_obj.amount, user_id=user_id) \
                 for ing_obj in ingredient_objs]
         )
         db.session.commit()
