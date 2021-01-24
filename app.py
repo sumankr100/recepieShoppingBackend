@@ -49,7 +49,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
 
-    @app.route('/redoc')
+    @app.route(f'{BASE_URL_PREFIX}/redoc')
     def send_redoc():
         ctx = {
             "HOST_URL": HOST_URL
